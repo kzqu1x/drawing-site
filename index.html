@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Continuous Abstract Figures</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+        }
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let isDrawing = false;
+        let drawingPosition = { x: 0, y: 0 };
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function drawCircle(x, y) {
+            ctx.beginPath();
+            const radius = Math.random() * 70 + 5; // Radius between 5 and 20 pixels
+            const startAngle = Math.random() * 2 * Math.PI;
+            const endAngle = startAngle + Math.random() * 2 * Math.PI;
+            const color = getRandomColor();
+            
+            ctx.arc(x, y, radius, startAngle, endAngle);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = color;
+            ctx.stroke();
+        }
+
+        function drawTriangle(x, y) {
+            ctx.beginPath();
+            const size = Math.random() * 70 + 10; // Size between 10 and 30 pixels
+            const color = getRandomColor();
+            
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + size, y);
+            ctx.lineTo(x + size / 2, y - size);
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = color;
+            ctx.stroke();
+        }
+
+        function drawAbstractFigures(x, y) {
+            for (let i = 0; i < 6; i++) {
+                if (Math.random() > 0.5) {
+                    drawCircle(x, y);
+                } else {
+                    drawTriangle(x, y);
+                }
+            }
+        }
+
+        function update() {
+            if (isDrawing) {
+                drawAbstractFigures(drawingPosition.x, drawingPosition.y);
+            }
+            requestAnimationFrame(update);
+        }
+
+        canvas.addEventListener('mousedown', (event) => {
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            drawingPosition.x = event.clientX - rect.left;
+            drawingPosition.y = event.clientY - rect.top;
+            drawAbstractFigures(drawingPosition.x, drawingPosition.y);
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+        });
+
+        canvas.addEventListener('mousemove', (event) => {
+            if (isDrawing) {
+                const rect = canvas.getBoundingClientRect();
+                drawingPosition.x = event.clientX - rect.left;
+                drawingPosition.y = event.clientY - rect.top;
+                drawAbstractFigures(drawingPosition.x, drawingPosition.y);
+            }
+        });
+
+        canvas.addEventListener('touchstart', (event) => {
+            event.preventDefault(); // Prevent scrolling on touch
+            isDrawing = true;
+            const rect = canvas.getBoundingClientRect();
+            for (const touch of event.changedTouches) {
+                drawingPosition.x = touch.clientX - rect.left;
+                drawingPosition.y = touch.clientY - rect.top;
+                drawAbstractFigures(drawingPosition.x, drawingPosition.y);
+            }
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', () => {
+            isDrawing = false;
+        });
+
+        canvas.addEventListener('touchmove', (event) => {
+            event.preventDefault(); // Prevent scrolling on touch
+            if (isDrawing) {
+                const rect = canvas.getBoundingClientRect();
+                for (const touch of event.changedTouches) {
+                    drawingPosition.x = touch.clientX - rect.left;
+                    drawingPosition.y = touch.clientY - rect.top;
+                    drawAbstractFigures(drawingPosition.x, drawingPosition.y);
+                }
+            }
+        }, { passive: false });
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        update(); // Start the animation loop
+    </script>
+</body>
+</html>
